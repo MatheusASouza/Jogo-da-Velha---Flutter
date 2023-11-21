@@ -1,0 +1,109 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MaterialApp(
+    home: JogoDaVelha(),
+    theme: ThemeData.dark(),
+  ));
+}
+
+class JogoDaVelha extends StatefulWidget {
+  @override
+  _JogoDaVelhaState createState() => _JogoDaVelhaState();
+}
+
+class _JogoDaVelhaState extends State<JogoDaVelha> {
+  List<List<String>> matriz = List.generate(3, (_) => List.filled(3, ''));
+  String jogadorAtual = 'X';
+  String vencedor = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Jogo da Velha', textAlign: TextAlign.center),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (int i = 0; i < 3; i++)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (int j = 0; j < 3; j++)
+                    DragTarget<String>(
+                      builder: (context, candidateData, rejectedData) {
+                        return Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white),
+                          ),
+                          child: Center(
+                            child: Text(
+                              matriz[i][j],
+                              style: TextStyle(fontSize: 72, color: matriz[i][j] == 'X' ? Colors.red : Colors.blue),
+                            ),
+                          ),
+                        );
+                      },
+                      onWillAccept: (data) => matriz[i][j] == '',
+                      onAccept: (data) {
+                        setState(() {
+                          matriz[i][j] = jogadorAtual;
+                          if (checarVencedor(jogadorAtual)) {
+                            vencedor = jogadorAtual;
+                          } else {
+                            jogadorAtual = jogadorAtual == 'X' ? 'O' : 'X';
+                          }
+                        });
+                      },
+                    ),
+                ],
+              ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Draggable<String>(
+                  data: 'X',
+                  child: Text('X', style: TextStyle(fontSize: 72, color: Colors.red)),
+                  feedback: Text('X', style: TextStyle(fontSize: 72, color: Colors.red)),
+                ),
+                Draggable<String>(
+                  data: 'O',
+                  child: Text('O', style: TextStyle(fontSize: 72, color: Colors.blue)),
+                  feedback: Text('O', style: TextStyle(fontSize: 72, color: Colors.blue)),
+                ),
+              ],
+            ),
+            if (vencedor != '')
+              Text(
+                'O vencedor é $vencedor',
+                style: TextStyle(fontSize: 24),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool checarVencedor(String jogador) {
+    for (int i = 0; i < 3; i++) {
+      if (matriz[i][0] == jogador && matriz[i][1] == jogador && matriz[i][2] == jogador) {
+        return true;
+      }
+      if (matriz[0][i] == jogador && matriz[1][i] == jogador && matriz[2][i] == jogador) {
+        return true;
+      }
+    }
+    if (matriz[0][0] == jogador && matriz[1][1] == jogador && matriz[2][2] == jogador) {
+      return true;
+    }
+    if (matriz[0][2] == jogador && matriz[1][1] == jogador && matriz[2][0] == jogador) {
+      return true;
+    }
+    return false;
+  }
+}
